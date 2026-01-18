@@ -116,21 +116,19 @@ def _generate_xslit_panorama_pyramid(warped_frames, bounding_boxes, slope, refer
     """
     n_frames = len(warped_frames)
     
-    # 1. Initialize Accumulators (Float32)
     acc_odd = np.zeros((canvas_height, canvas_width, 3), dtype=np.float32)
     w_odd = np.zeros((canvas_height, canvas_width, 1), dtype=np.float32)
     
     acc_even = np.zeros((canvas_height, canvas_width, 3), dtype=np.float32)
     w_even = np.zeros((canvas_height, canvas_width, 1), dtype=np.float32)
 
-    # Mask: 1.0 = Odd, 0.0 = Even. We fill this on the fly.
+    # Mask: 1.0 = Odd, 0.0 = Even
     barcode_mask = np.zeros((canvas_height, canvas_width), dtype=np.float32)
 
     for i in range(n_frames):
         warped_image = warped_frames[i]
         _, warped_w = warped_image.shape[:2]
         
-        # --- 1. Strip Geometry (Dynamic) ---
         curr_x = int(bounding_boxes[i][0, 0])
         curr_y = int(bounding_boxes[i][0, 1])
         
@@ -154,7 +152,6 @@ def _generate_xslit_panorama_pyramid(warped_frames, bounding_boxes, slope, refer
         strip = warped_image[:, src_start:src_end].astype(np.float32)
         if strip.shape[1] == 0: continue
 
-        # --- 2. Canvas Mapping ---
         dst_x_start = curr_x
         dst_x_end = dst_x_start + strip.shape[1]
         dst_y_start = curr_y
@@ -179,16 +176,13 @@ def _generate_xslit_panorama_pyramid(warped_frames, bounding_boxes, slope, refer
         if clipped_strip.shape[1] != target_w or clipped_strip.shape[0] != target_h:
             clipped_strip = cv2.resize(clipped_strip, (target_w, target_h), interpolation=cv2.INTER_LINEAR)
 
-        # --- 3. Accumulate & Mask ---
         if i % 2 != 0: # Odd
             acc_odd[canvas_y1:canvas_y2, canvas_x1:canvas_x2] += clipped_strip
             w_odd[canvas_y1:canvas_y2, canvas_x1:canvas_x2] += 1.0
-            # Paint Mask: Odd "wins" this region
             barcode_mask[canvas_y1:canvas_y2, canvas_x1:canvas_x2] = 1.0
         else: # Even
             acc_even[canvas_y1:canvas_y2, canvas_x1:canvas_x2] += clipped_strip
             w_even[canvas_y1:canvas_y2, canvas_x1:canvas_x2] += 1.0
-            # Paint Mask: Even "wins" this region
             barcode_mask[canvas_y1:canvas_y2, canvas_x1:canvas_x2] = 0.0
 
     
@@ -202,13 +196,11 @@ def _generate_xslit_panorama_pyramid(warped_frames, bounding_boxes, slope, refer
     mosaic_even = np.zeros_like(acc_even)
     mosaic_even[np.repeat(valid_even, 3, axis=2)] = (acc_even / np.maximum(w_even, 1))[np.repeat(valid_even, 3, axis=2)]
 
-    # --- 5. Hole Filling (EXACTLY AS IN EX4.PY) ---
     only_odd = valid_odd & ~valid_even
     only_even = valid_even & ~valid_odd
     barcode_mask[only_odd[:, :, 0]] = 1.0
     barcode_mask[only_even[:, :, 0]] = 0.0
     
-    # --- 6. Blend ---
     blender = PyramidBlender(levels=3)
     result = blender.blend(mosaic_odd, mosaic_even, barcode_mask)
 
