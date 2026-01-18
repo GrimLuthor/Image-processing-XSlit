@@ -95,7 +95,7 @@ iio.imwrite("outputs/boat_xslit.mp4", frames, fps=60)
 | Input | Output (24 viewpoints) |
 |-------|------------------------|
 | viewpoint_input.mp4 | Smooth parallax effect, barcode blending mitigates pole blinking |
-| dinamic_input.mp4 | Vertical motion filter handles waterfall dynamics |
+| dynamic_input.mp4 | Vertical motion filter handles waterfall dynamics |
 
 ### X-Slit Forward Panorama (Bonus)
 
@@ -108,8 +108,9 @@ iio.imwrite("outputs/boat_xslit.mp4", frames, fps=60)
 
 The algorithm assumes objects are distant relative to their internal depth variation. Scenes with multiple distinct depth planes (like ground tiles + distant buildings) break the single-homography assumption, causing ghosting and stretching artifacts. See `bad_input.mp4` for an example.
 
-## References
+## Referencess
 
-- Vivet, D., Peleg, S., Binefa, X. "Real-Time Stereo Mosaicing using Feature Tracking" (2011) — Barcode blending with double-width strips
-- Zomet, A., Feldman, D., Peleg, S. "Mosaicing New Views: The Crossed-Slits Projection" (2003) — X-Slit projection model and space-time slicing
-- Peleg, S., Ben-Ezra, M., Pritch, Y. "Omnistereo: Panoramic Stereo Imaging" (2001) — Foundations of stereo mosaicing
+* Vivet, D., Peleg, S., Binefa, X. "Real-Time Stereo Mosaicing using Feature Tracking" (2011) — Barcode blending with double-width strips
+* Zomet, A., Feldman, D., Peleg, S. "Mosaicing New Views: The Crossed-Slits Projection" (2003) — X-Slit projection model and space-time slicing
+* Rav-Acha, A., Engel, G., Peleg, S. "Omnistereo: Panoramic Stereo Imaging" (2001) — Foundations of stereo mosaicing
+* Peleg, S., Ben-Ezra, M. "Mosaicing Impossible Stereo Views" (2003) — Aspect ratio distortion analysis and vertical scaling correction
